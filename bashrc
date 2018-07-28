@@ -1,3 +1,4 @@
+#!/bin/bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -17,7 +18,13 @@ shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=1000
-HISTFILESIZE=2000
+HISTFILESIZE=10000
+
+# before each command, write to ~/.bash_history
+PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
+
+# multi-line commands should be stored as a single command
+shopt -s cmdhist
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -67,6 +74,11 @@ else
 fi
 unset color_prompt force_color_prompt
 
+set-django-class-env() {
+    export PS1='\n\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]\n$ '
+    export PYTHONDONTWRITEBYTECODE=yes
+}
+
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
 xterm*|rxvt*)
@@ -91,8 +103,8 @@ if ! shopt -oq posix; then
   fi
 fi
 
-export PYTHONSTARTUP="$HOME/.pystartup.py"
-export PYTHONPATH="$HOME/python"
+export PYTHONSTARTUP="$HOME/python/pystartup.py"
+export PYTHONPATH="$HOME/python/"
 
 export EDITOR=vim
 export LANGUAGE='en_US.UTF-8' # 'en_US.UTF-8 git'
@@ -111,3 +123,6 @@ export PATH="$PATH:$HOME/python/"
 export PATH="$PATH:$HOME/python/amc_utils"
 export PATH="$PATH:$HOME/bash/"
 export PATH="$PATH:$HOME/Markdown_1.0.1/"
+
+WORKON_HOME=$HOME/.virtualenvs
+source /usr/local/bin/virtualenvwrapper.sh 
