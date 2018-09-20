@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # interactive aliases to improve security
-alias rm='rm -i' # in recent version of bash, -i = --interactive
-alias mv='mv -i' # in recent version of bash, -i = --interactive
-alias cp='cp -i' # in recent version of bash, -i = --interactive
+alias rm='rm -i'  # in recent version of bash, -i = --interactive
+alias mv='mv -i'  # in recent version of bash, -i = --interactive
+alias cp='cp -i'  # in recent version of bash, -i = --interactive
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto' # bad idea to add --group-directories-first for last-download, see "alias lg"
+    alias ls='ls --color=auto'  # bad idea to add --group-directories-first for last-download, see "alias lg"
     alias dir='dir --color=auto'
     alias vdir='vdir --color=auto'
 
@@ -16,34 +16,50 @@ if [ -x /usr/bin/dircolors ]; then
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 else
-    alias ls='ls' # bad idea to add --group-directories-first for last-download, see "alias lg"
+    alias ls='ls'  # bad idea to add --group-directories-first for last-download, see "alias lg"
 fi
 
 # some more ls/cd aliases
-alias ll='ls -lhgG' # -G = --no-group, -g = do not print user
+alias ll='ls -lhgG'  # -G = --no-group, -g = do not print user
 alias la='ls -A'
-alias lg='ls --group-directories-first'
+alias lsg='ls --group-directories-first'
+alias lg='l --group-directories-first'
+alias lsd='ls -d */'  # show only directories
+alias lgd='lsd'
 alias l='ls -CF'
 alias s='cd ..'
-alias ss='cd ../..' # cannot use ss program, but I don't care
+alias ss='cd ../..'  # if you want `/bin/ss`, write `/bin/ss`
 alias sss='cd ../../..'
+alias h=cd  # such that 'h' means 'cd $HOME'
+alias c=cd  # because two letters are too much
 
 # typos
-alias dc=cd
+alias dc=cd  # if you want dc calculator, use /usr/bin/dc
 alias kaet=kate
 
-# custom aliases
+# shortening useful commands
+alias ff=firefox
+alias k=kate
+
+# tweaking of standard commands 
 alias less='less -S'
+
+# standard commands simple modification
+alias hcat='tail -n +1'  # hcat FILES...
+
+# custom aliases
 alias silent-background='$1 > /dev/null 2> /dev/null &'
 alias background-silent='$1 > /dev/null 2> /dev/null &'
+alias pyecho='python -c "import sys; from pprint import pprint; pprint(sys.argv[1:])"'
 
 # operations on just created files
-# function last-download below # alias last-download='ls -d /home/robert/downloads/* --sort=time | head -n 1'
+## last-* aliases are actually defined below as functions to take One parameter: n
+#alias last-download='ls -d ~/downloads/* --sort=time | head -n 1'
 alias move-last-download='mv --verbose "$(last-download)" .'
-alias last-screenshot='ls -d /home/robert/pictures/screenshots/* --sort=time | head -n 1'
-alias last-screenshots='ls -d /home/robert/pictures/screenshots/* --sort=time | head -n 10'
+#alias last-screenshot='ls -d ~/pictures/screenshots/* --sort=time | head -n 1'
+#alias last-screenshots='ls -d ~/pictures/screenshots/* --sort=time | head -n 10'
 alias copy-last-screenshot='cp --verbose "$(last-screenshot)" .'
-alias last-webcam='ls -d /home/robert/Webcam/* --sort=time | head -n 1'
+alias last-webcam='ls -d ~/Webcam/* --sort=time | head -n 1'
 
 # recordmydesktop
 alias recordmydesktop-one-screen='recordmydesktop --width=1920 --height=1080'
@@ -56,7 +72,89 @@ alias recordmydesktop-mobile='recordmydesktop --width=540 --height=960'
 alias pbcopy='xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
 
-alias pyecho='python -c "import sys; print sys.argv[1:]"'
+# misc.
+
+#############
+# functions #
+#############
+
+last-download() {
+    if [ -z "$1" ]; then 
+        N=1
+    else
+        N="$1"
+    fi
+    ls -d ~/downloads/* --sort=time | head -n "$N"
+}
+
+last-screenshot() {
+    if [ -z "$1" ]; then
+        N=1
+    else
+        N="$1"
+    fi
+    ls -d ~/screenshots/* --sort=time | head -n "$N"
+}
+
+last-screenshots() {
+    if [ -z "$1" ]; then
+        N=10
+    else
+        N="$1"
+    fi
+    ls -d ~/screenshots/* --sort=time | head -n "$N"
+}
+
+cut-last-screenshot() {
+    if [ -z "$1" ]; then
+        direction=keep-bottom
+    else
+        direction="$1"
+    fi
+    
+    if [ -z "$2" ]; then
+        percent=50
+    else
+        percent="$2"
+    fi
+    
+    filename=$(last-screenshot)
+
+    python3 -c '
+import sys, os, subprocess, re, pathlib
+from datetime import datetime, timedelta
+from fractions import Fraction
+direction, percent, filename = sys.argv[1:]
+
+ratio = Fraction(percent) if re.match("\d+/\d+", percent) else int(percent)/100
+
+fmt = str(pathlib.Path("~/screenshots/screenshot_%Y-%m-%d_%H:%M_%S.png").expanduser())
+new_name = datetime.strftime(datetime.strptime(filename, fmt) + timedelta(seconds=1), fmt)
+
+w,h = map(int, subprocess.check_output(["identify", filename], universal_newlines=True).split()[2].split("x"))
+top = int(ratio * h)
+bottom = h - top
+left = int(ratio * w)
+right = w - left
+
+keep = (f"{w}x{top}+0+0" if direction == "keep_left" else
+        f"{w}x{top}+0+0" if direction == "keep_top" else
+        f"{w}x{bottom}+0+{top}" if direction == "keep_right" else
+        f"{w}x{bottom}+0+{top}") # if direction == "keep_bottom" 
+
+subprocess.run(["convert", filename, "-crop", keep, new_name])
+print("Created", new_name)
+    ' "$direction" "$percent" "$filename"
+}
+alias cut-last-screenshot-keep-bottom='cut-last-screenshot keep-bottom'
+alias cut-last-screenshot-keep-top='cut-last-screenshot keep-top'
+alias cut-last-screenshot-keep-left='cut-last-screenshot keep-left'
+alias cut-last-screenshot-keep-right='cut-last-screenshot keep-right'
+
+set-django-class-env() {
+    export PS1='\n\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]\n$ '
+    export PYTHONDONTWRITEBYTECODE=yes
+}
 
 activatevenv() {
     if [ $# = 1 ]; then
@@ -69,7 +167,7 @@ activatevenv() {
         elif [ -d create ]; then
             d=create
         else
-            echo "usage: activatevenv NAME"
+            echo "usage: activatevenv NAME (or have a 'env', 'venv' or 'create' directory in your current dir)"
         fi
     fi
     source "$d/bin/activate"
@@ -92,7 +190,10 @@ print(name)
 }
 
 make-script() {
-    touch "$1"
+    if [ -e "$1" ]; then
+        echo "File exists"
+        return
+    fi
     echo "#!/bin/bash" >> "$1"
     echo >> "$1"
     chmod +x "$1"
@@ -106,6 +207,11 @@ make-pyscript() {
         echo "usage: make-pyscript NAME"
         return
     fi
+    
+    if [ -e "$name" ]; then
+        echo "File exists"
+        return
+    fi
 
     name=$(python3 -c '
 import sys, os
@@ -115,20 +221,14 @@ if not os.path.splitext(name)[1]:
 print(name)
     ' "$name")
 
-    touch "$name"
-    echo "#!/usr/bin/env python3" >> "$name"
-    echo >> "$name"
+    echo '#!/usr/bin/env python3
+import argparse
+p = parser = argparse.ArgumentParser()
+p.add_argument("file")
+a = args = parser.parse_args()
+' >> "$name"
     chmod +x "$name"
     vim -c startinsert + "$name"
-}
-
-last-download() {
-    if [ -z "$1" ]; then
-        N=1
-    else
-        N="$1"
-    fi
-    ls -d /home/robert/downloads/* --sort=time | head -n "$N"
 }
 
 alias ls-writable=lswritable
@@ -201,7 +301,7 @@ long-ps1() {
     NEW_PS1=$(python3 -c '
 import sys
 PS1 = sys.argv[1]
-PS1 = "(" + PS1.rstrip().rstrip("$") + ")" + "\n$ "
+PS1 = "\n(" + PS1.rstrip().rstrip("$").strip() + ")" + "\n$ "
 print(PS1)
     ' "$PS1")
 
@@ -277,4 +377,26 @@ restore-ps1() {
         PROMPT_COMMAND="$OLD_PROMPT_COMMAND"
         OLD_PROMPT_COMMAND=''
     fi
+}
+
+
+swap(){
+    if [ -e "$1" ] && [ -e "$2" ]; then
+        temp=$(date +%s)
+        if [ -e "$temp" ]; then
+            echo "File with timestamp already exists: '$temp'"
+            return
+        fi
+        mv "$1" "$temp"  # mv -f ?
+        mv "$2" "$1"
+        mv "$temp" "$2"
+    else
+        echo "Files must exist: '$1', '$2'"
+    fi
+}
+
+upload-last-mp3() {
+    f=$(ls -t *.mp3 | head -1)
+    scp "$f" rob:mp3-transit
+    echo "Uploaded '$f'"
 }

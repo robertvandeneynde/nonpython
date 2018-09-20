@@ -1,0 +1,33 @@
+[user]
+	name = Robert Vanden Eynde
+	email = robertvandeneynde@hotmail.com
+[core]
+	editor = vim
+        commentChar = auto
+[alias]
+	co = checkout
+	ci = commit
+	st = status -bs
+	stu = status -bs -uno
+	br = branch
+	
+        logg = log --decorate --graph --oneline --all
+	logh = log --format=\"%h (%ad) %s%d [%an]\" --graph --date=short
+        logr = log --format=\"%h (%ar) %s%d [%an]\" --graph --date=short
+        logd = log --format=\"%h (%ar) %s%d [%an]\" --graph --date=short
+	
+        commitupdate = commit -am Update
+        commitauto = commitupdate
+        ciauto = commitauto
+	cito = commitauto
+	
+        cimmmend = commit -a --ammend
+	commitmmmend = commit -a --ammend
+        
+        commitamessage = commit -aeF message.txt
+        commitmessage = commitamessage # commit -aeF message.txt
+        ciamessage = commitamessage
+        cimessage = commitmessage
+        ciamessage = commitamessage 
+[push]
+	default = simple

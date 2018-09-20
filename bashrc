@@ -66,18 +66,17 @@ fi
 if [ "$color_prompt" = yes ]; then
     # PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
     # PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-    PS1='\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\] $ '
+    # PS1='\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\] $ '
+    PS1='\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\] '
+    # PS1='\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\] ; '  # useful for copy paste!
 else
     # PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-    # PS1='${debian_chroot:+($debian_chroot)}\u:\w\$ '
-    PS1='\A \w\ $ '
+    # PS1='${debian_chroot:+($debian_chroot)}\u:\w\$ $ '
+    # PS1='\A \w\ $ '
+    PS1='\A \w\ '
+    # PS1='\A \w\ ; '  # useful for copy paste!
 fi
 unset color_prompt force_color_prompt
-
-set-django-class-env() {
-    export PS1='\n\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]\n$ '
-    export PYTHONDONTWRITEBYTECODE=yes
-}
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
@@ -103,6 +102,9 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# I don't want the line continuation prompt ">'
+PS2=''
+
 export PYTHONSTARTUP="$HOME/python/pystartup.py"
 export PYTHONPATH="$HOME/python/"
 
@@ -119,10 +121,11 @@ export PATH="$PATH:/usr/local/android-sdk-linux/build-tools"
 export PATH="$PATH:/home/robert/miniconda2/bin"
 
 # own directories in PATH
-export PATH="$PATH:$HOME/python/"
+export PATH="$PATH:$HOME/python"
 export PATH="$PATH:$HOME/python/amc_utils"
-export PATH="$PATH:$HOME/bash/"
-export PATH="$PATH:$HOME/Markdown_1.0.1/"
+export PATH="$PATH:$HOME/nonpython"
+export PATH="$PATH:$HOME/bash"
+export PATH="$PATH:$HOME/perl"
 
 WORKON_HOME=$HOME/.virtualenvs
 source /usr/local/bin/virtualenvwrapper.sh 
