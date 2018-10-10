@@ -16,7 +16,7 @@ if [ -x /usr/bin/dircolors ]; then
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 else
-    alias ls='ls'  # bad idea to add --group-directories-first for last-download, see "alias lg"
+    : # alias ls='ls'  # bad idea to add --group-directories-first for last-download, see "alias lg"
 fi
 
 # some more ls/cd aliases
@@ -24,6 +24,7 @@ alias ll='ls -lhgG'  # -G = --no-group, -g = do not print user
 alias la='ls -A'
 alias lsg='ls --group-directories-first'
 alias lg='l --group-directories-first'
+alias llg='ll --group-directories-first'
 alias lsd='ls -d */'  # show only directories
 alias lgd='lsd'
 alias l='ls -CF'
@@ -46,6 +47,8 @@ alias less='less -S'
 
 # standard commands simple modification
 alias hcat='tail -n +1'  # hcat FILES...
+#wc-lines-sorted()
+#alias wcls=wc-lines-sorted
 
 # custom aliases
 alias silent-background='$1 > /dev/null 2> /dev/null &'
@@ -399,4 +402,34 @@ upload-last-mp3() {
     f=$(ls -t *.mp3 | head -1)
     scp "$f" rob:mp3-transit
     echo "Uploaded '$f'"
+}
+
+vimcat() {
+    vim "$1" && cat "$1"
+}
+
+wc-lines-sorted() {
+    wc -l $@ | sort -h
+}
+alias wcls=wc-lines-sorted
+
+streaming() {
+     INRES="1920x1080"    # input resolution
+     OUTRES="1920x1080"   # output resolution
+     FPS="15"             # target FPS
+     GOP="30"             # i-frame interval, should be double of FPS, 
+     GOPMIN="15"          # min i-frame interval, should be equal to fps, 
+     THREADS="2"          # max 6
+     CBR="1000k"          # constant bitrate (should be between 1000k - 3000k)
+     QUALITY="ultrafast"  # one of the many FFMPEG preset
+     AUDIO_RATE="44100"   # audio rate
+     SERVER="live-ams"    # twitch server, see http://bashtech.net/twitch/ingest.php to change 
+     
+     echo -n "StreamKey: "
+     read -s STREAM_KEY
+     
+     ffmpeg -f x11grab -s "$INRES" -r "$FPS" -i :0.0 -f alsa -i pulse -f flv -ac 2 -ar $AUDIO_RATE \
+       -vcodec libx264 -g $GOP -keyint_min $GOPMIN -b:v $CBR -minrate $CBR -maxrate $CBR -pix_fmt yuv420p\
+       -s $OUTRES -preset $QUALITY -tune film -acodec libmp3lame -threads $THREADS -strict normal \
+       -bufsize $CBR "rtmp://$SERVER.twitch.tv/app/$STREAM_KEY"
 }

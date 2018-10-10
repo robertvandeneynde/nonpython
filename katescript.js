@@ -10,9 +10,11 @@ var katescript = {
         "replaceForAllNotation",
         "replaceLatex",
         "replaceNbsp",
+        "replaceLt",
         "replaceHtml",
         "columnAlign",
         "formatJson",
+        "formatMarkdown",
         "expandSelection",
         "encloseSingleComment",
         "camelCaseToUnderscore",
@@ -23,19 +25,28 @@ var katescript = {
         "makepmatrix",
         "makeBlockTrans",
         "makeSelfTranslation",
+        "insertFrenglishSemicolon",
         "makeSelfTranslationNoSpace",
         "makeSelfTranslationTwoLines",
-        "encloseSelection",
+        "enclose",
+        "encloseSave",
         "makeStrong",
+        "makeCode",
         "makeEm",
         "mimetype",
         "arrayToLatexMatrix",
         "encloseCustom",
         "saveEnclose",
         "xorEncode",
-        "encloseSelectionHtml",
-        "ipafrench"
-    ],
+        "encloseHtml",
+        "encloseHtmlKeyboard",
+        "encloseHtmlKbd",
+        "ipafrench",
+        "htmlMarklines",
+        "htmlKeyboard",
+        "htmlEnclose",
+        "selectLine",
+    ""],
     "actions": [
         {
             "function": "replaceNbsp",
@@ -67,8 +78,18 @@ var katescript = {
             "category": "Replace"
         },
         {
+            "function": "replaceHtml",
+            "name": "htmlReplace",
+            "category": "Replace/alias"
+        },
+        {
             "function": "formatJson",
             "name": "formatJson",
+            "category": "Replace"
+        },
+        {
+            "function": "formatMarkdown",
+            "name": "formatMarkdown",
             "category": "Replace"
         },
         {
@@ -79,9 +100,86 @@ var katescript = {
         {
             "function": "expandSelection",
             "name": "expandSelection",
-            "category": "Expand Selection"
-        }
-    ]
+            "category": "Selection"
+        },
+        {
+            "function": "selectLine",
+            "name": "selectLine",
+            "category": "Selection"
+        },
+        {
+            "function": "makeEm",
+            "name": "makeEm",
+            "category": "Divers"
+        },
+        {
+            "function": "makeStrong",
+            "name": "makeStrong",
+            "category": "Divers"
+        },
+        {
+            "function": "makeCode",
+            "name": "makeCode",
+            "category": "Divers"
+        },
+        {
+            "function": "makeLink",
+            "name": "makeLink",
+            "category": "Divers"
+        },
+        {
+            "function": "camelCaseToUnderscore",
+            "name": "camelCaseToUnderscore",
+            "category": "Enclose"
+        },
+        {
+            "function": "makeBlockTrans",
+            "name": "makeBlockTrans",
+            "category": "Enclose"
+        },
+        {
+            "function": "makeSelfTranslation",
+            "name": "makeSelfTranslation",
+            "category": "Enclose"
+        },
+        {
+            "function": "encloseHtmlKbd",
+            "name": "encloseHtmlKbd",
+            "category": "Enclose"
+        },
+        {
+            "function": "encloseHtmlKbd",
+            "name": "encloseHtmlKbd",
+            "category": "Enclose"
+        },
+        {
+            "function": "insertFrenglishSemicolon",
+            "name": "insertFrenglishSemicolon",
+            "category": "Insert"
+        },
+        {
+            "function": "makeSelfTranslationNoSpace",
+            "name": "makeSelfTranslationNoSpace",
+            "category": "Enclose"
+        },
+        {
+            "function": "makeSelfTranslationTwoLines",
+            "name": "makeSelfTranslationTwoLines",
+            "category": "Enclose"
+        },
+        {
+            
+            "function": "enclose",
+            "name": "enclose",
+            "category": "Enclose"
+        },
+        {
+            
+            "function": "encloseCustom",
+            "name": "encloseCustom",
+            "category": "Enclose"
+        },
+    {}]
 }; // kate-script header, must be at the start of the file as a valid JSON object (therefore without comments)
 
 // http://www.kate-editor.org/doc/advanced-editing-tools-scripting.html#advanced-editing-tools-scripting-api
@@ -214,13 +312,17 @@ var allSubstitutes = {
         ["cup",     "∪"],
         ["cap",     "∩"],
         
+        ["sqrt",    "√"],
+        
         ["bigwedge","⋀"],
         ["bigvee",  "⋁"],
         
         ["bigcup",  "⋃"],
         ["bigcap",  "⋂"],
         
-        ["equiv",   "≡"],
+        ['perp',    '⊥'],
+        ['bot',     '⊥'],
+        ['top',     '⊤'],
                        
         ["times",   "×"], // \u00D7
         ["cdot",    "⋅"], // \u22C5
@@ -281,6 +383,9 @@ var allSubstitutes = {
     ]),
     nbsp:[
         ["&nbsp;", " "],
+    ],
+    lt:[
+        ["<", "&lt;"],
     ],
     html: fstarmap(function(x, y) { return ["&" + x + ";", y] }, [
         ['amp',      '&'],     
@@ -581,7 +686,7 @@ function replaceMultiple(name) {
         )
     }
     
-    var textInSelection = document.text( view.selection() ); // view.selectedText(), may be ''
+    var textInSelection = document.text(selectionRange); // may be '' // document.text(view.selection()) == view.selectedText()
     
     var newTextInSelection = ''
     for(var i = 0; i < textInSelection.length; ) {
@@ -662,7 +767,7 @@ function splitWhitespaceGuillements(line) {
     return res
 }
 
-function columnAlign(/* args... */) {
+function columnAlign(/* ...args */) {
     var args = 0 < arguments.length ? [].slice.call(arguments, 0) : [];
     var widths = _(args).map(function(x) {
         var int = parseInt(x, 10)
@@ -734,6 +839,10 @@ function replaceHtml() {
 
 function replaceNbsp() {
     replaceMultiple('nbsp')
+}
+
+function replaceLt() {
+    replaceMultiple('lt')
 }
 
 /**
@@ -839,7 +948,16 @@ function getIndent(str) {
 }
 
 function encloseSingleComment() {
-    var comment = "//"
+    var DATA = {
+        "application/javascript": "//",
+        "text/x-cpp": "//",
+        "text/x-c": "//",
+        "text/x-java": "//",
+        "text/x-python": "#",
+        "application/x-shellscript": "#",
+        "text/x-tex": "%",
+    }
+    var comment = DATA[document.mimeType()] || "#"
     replaceTotalLines(function(lines) {
         var m = _.min(_.map(lines, function(line) {
             return getIndent(line).length
@@ -859,8 +977,32 @@ function formatJson() {
     })
 }
 
+function formatMarkdown() {
+    if(isLatex()) {
+        var bold = ['\\textbf{', '}']
+        var ital = ['\\emph{', '}']
+    } else if(isHtml() || true) {
+        var bold = ['<strong>', '</strong>']
+        var ital = ['<em>', '</em>']
+    }
+    
+    replaceText(function(text) {
+        return text.replace(/[*][*](.*?)[*][*]|__(.*?)__/g, function(sub, group1, group2, i, string){
+            var group = group1 || group2
+            return bold[0] + group + bold[1]
+        }).replace(/[*](.*?)[*]|_(.*?)_/g, function(sub, group1, group2, i, string){
+            var group = group1 || group2
+            return ital[0] + group + ital[1]
+        }).replace(/\[(.*?)\]\((.*?)\)/g, function(sub, group1, group2, i, string){ return '<a href="' + group2 + '">' + group1 + '</a>' })
+    })
+}
+
 function expandSelection() {
     view.setSelection(_expandedSelection())
+}
+
+function selectLine() {
+    view.setSelection(_smartLineSelection())
 }
 
 /* Here is an example for all the replaceLines functions.
@@ -889,30 +1031,34 @@ function _expandedSelection(selection) {
     if(selection == null)
         selection = view.selection()
         
-    if(!selection.isValid())
+    if(! selection.isValid())
         return selection
     
     return new Range(
-        new Cursor(selection.start.line, 0),
-        new Cursor(selection.end.line, document.lineLength(selection.end.line))
-    )
+        selection.start.line, 0,
+        selection.end.line, document.lineLength(selection.end.line))
 }
 
-function _expandSelection(selection) {
+function _smartLineSelection(selection) {
     if(selection == null)
         selection = view.selection()
         
-    if(!selection.isValid())
-        return
+    if(! selection.isValid())
+        return selection
     
-    selection.start.column = 0
-    selection.end.column = document.lineLength(selection.end.line)
+    if(selection.start.line != selection.end.line)
+        return _expandedSelection()
+    
+    var l = selection.start.line
+    return new Range(
+        l, document.firstChar(l), // Since KDE 4.9 // Returns the first character that's not a whitespace // https://docs.kde.org/trunk5/en/applications/katepart/dev-scripting.html
+        l, document.lastChar(l))  // Since KDE 4.9 // Returns the last character that's not a whitespace  // https://docs.kde.org/trunk5/en/applications/katepart/dev-scripting.html
 }
 
 function _resultToString(f_x) {
-    if( _.isArray(f_x) ) {
-        return f_x.join("\n");
-    } else if ( _.isString(f_x) ) {
+    if(_.isArray(f_x)) {
+        return f_x.join("\n")
+    } else if(_.isString(f_x)) {
         return f_x
     } else {
         throw new Exception("callback function for each has to return string or array of lines");
@@ -979,7 +1125,7 @@ replaceTotalLines(function(lines){
 function replaceTotalText(func) {
     var selection = _expandedSelection()
     
-    if(!selection.isValid())
+    if(! selection.isValid())
         return
         
     var text = _translateSelectionText(selection, func)
@@ -998,7 +1144,7 @@ replaceTotalText(function(lines){
 function replaceText(func) {
     var selection = view.selection()
     
-    if(!selection.isValid())
+    if(! selection.isValid())
         return
     
     var text = _translateSelectionText(selection, func)
@@ -1047,11 +1193,16 @@ function encloseSelection(start, end) {
     }
 }
 
+enclose = encloseSelection;
+
 var saveEncloseState = {
     begin: '',
     end: '',
 }
 
+/**
+ * Save from selected text separated by "%%"
+ */
 function saveEnclose() {
     var selection = view.selection();
     if(! selection.isValid())
@@ -1068,6 +1219,16 @@ function saveEnclose() {
 function encloseCustom() {
     encloseSelection(saveEncloseState.begin, saveEncloseState.end)
 }
+
+/**
+ * Save from command line.
+ * Can run encloseCustom after.
+ */
+function encloseSave(start, end) {
+    saveEncloseState.begin = start
+    saveEncloseState.end = end
+}
+
 
 /**
  * example : encloseSelectionHtml('a') -> <a>{}</a>
@@ -1126,6 +1287,14 @@ function encloseSelectionHtml(tag) {
     
 }
 
+encloseHtml = encloseSelectionHtml; // function encloseHtml
+
+function encloseHtmlKbd() {
+    return encloseSelectionHtml('kbd');
+}
+
+encloseHtmlKeyboard = encloseHtmlKbd; // function encloseHtmlKeyboard
+
 function makepmatrix() {
     return encloseSelection('\\begin{pmatrix}', '\\end{pmatrix}')
 }
@@ -1141,6 +1310,10 @@ function makeBlockTrans() {
 
 function makeSelfTranslation() {
     encloseSelection("{{ ", " | }}")
+}
+
+function insertFrenglishSemicolon() {
+    document.insertText(view.cursorPosition(), "{{ |}}:")
 }
 
 function makeSelfTranslationNoSpace() {
@@ -1168,6 +1341,11 @@ function makeStrong() {
         encloseSelection('\\textbf{', '}')
     else if(isHtml() || true)
         encloseSelection('<strong>', '</strong>')
+}
+
+function makeCode() {
+    if(isHtml() || true)
+        encloseSelection('<code>', '</code>')
 }
 
 function makeEm() {
@@ -1285,3 +1463,16 @@ function ipafrench() {
         document.editEnd()
     }
 }
+
+function htmlMarklines() {
+    replaceTotalLines(function(lines) {
+        return _.map(lines, function(line){
+            var T = /(\s*)(.*)/.exec(line)
+            var a = T[1]
+            var b = T[2]
+            return a + '<mark>' + b + '</mark>'
+        })
+    }) 
+}
+htmlKeyboard = encloseHtmlKeyboard
+htmlEnclose = encloseHtml

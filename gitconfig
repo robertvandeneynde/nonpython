@@ -17,17 +17,18 @@
         logd = log --format=\"%h (%ar) %s%d [%an]\" --graph --date=short
 	
         commitupdate = commit -am Update
-        commitauto = commitupdate
-        ciauto = commitauto
-	cito = commitauto
+        commitaupdate = commit -am Update
+        commitauto = commit -am Update
+        ciauto = commit -am Update
+	cito = commit -am Update
 	
         cimmmend = commit -a --ammend
 	commitmmmend = commit -a --ammend
         
         commitamessage = commit -aeF message.txt
-        commitmessage = commitamessage # commit -aeF message.txt
-        ciamessage = commitamessage
-        cimessage = commitmessage
-        ciamessage = commitamessage 
+        commitmessage = commit -aeF message.txt
+        ciamessage = commit -aeF message.txt
+        cimessage = commit -aeF message.txt
+        ciamessage = commit -aeF message.txt
 [push]
 	default = simple

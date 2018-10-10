@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# d=$(LC_ALL=en date +%a-%b-%d-%Y_%Hh%Mm%Ss)
+d=$(LC_ALL=en date +%a-%d-%b-%Y)
+echo "$d"
+if [ -d "$d" ]; then
+    echo "Existing dir"
+else
+    mkdir "$d"
+    rm -f ~/test/todaydir
+    ln -s "$d" ~/test/todaydir
+fi
+cd "$d"
