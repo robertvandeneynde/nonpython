@@ -1,34 +1,51 @@
 [user]
-	name = Robert Vanden Eynde
-	email = robertvandeneynde@hotmail.com
+    name = Robert Vanden Eynde
+    email = robertvandeneynde@hotmail.com
 [core]
-	editor = vim
-        commentChar = auto
+    editor = vim
+    commentChar = auto
 [alias]
-	co = checkout
-	ci = commit
-	st = status -bs
-	stu = status -bs -uno
-	br = branch
-	
-        logg = log --decorate --graph --oneline --all
-	logh = log --format=\"%h (%ad) %s%d [%an]\" --graph --date=short
-        logr = log --format=\"%h (%ar) %s%d [%an]\" --graph --date=short
-        logd = log --format=\"%h (%ar) %s%d [%an]\" --graph --date=short
-	
-        commitupdate = commit -am Update
-        commitaupdate = commit -am Update
-        commitauto = commit -am Update
-        ciauto = commit -am Update
-	cito = commit -am Update
-	
-        cimmmend = commit -a --ammend
-	commitmmmend = commit -a --ammend
-        
-        commitamessage = commit -aeF message.txt
-        commitmessage = commit -aeF message.txt
-        ciamessage = commit -aeF message.txt
-        cimessage = commit -aeF message.txt
-        ciamessage = commit -aeF message.txt
+    co = checkout
+    #ci = commit
+    br = branch
+    sta = status
+    st = status -bs
+    stu = status -bs -uno
+    stignore = ls-files --others --exclude-standard
+
+    logg = log --decorate --graph --oneline --all
+
+    loga = log --graph --format=giga --date=short
+    logh = log --graph --format=gig --date=iso
+    logr = log --graph --format=gig --date=relative
+    logd = log --graph --format=gig --date=short
+    #logh = log --graph --date=iso   --format=\"%C(yellow)%h%Creset (%Cgreen%ai%Creset) %s%d [%Cblue%an%Creset]\"
+    #logr = log --graph              --format=\"%C(yellow)%h%Creset (%Cgreen%ar%Creset) %s%d [%Cblue%an%Creset]\"
+    #logd = log --graph --date=short --format=\"%C(yellow)%h%Creset (%Cgreen%ad%Creset) %s%d [%Cblue%an%Creset]\"
+    
+    #logd = log --format=%ar 
+    lastdate = log --format=%ar -1
+    
+    commitupdate = commit -am Update
+    commitaupdate = commit -am Update
+    commitauto = commit -am Update
+    ciauto = commit -am Update
+    cito = commit -am Update
+    
+    cimmmend = commit -a --ammend
+    commitmmmend = commit -a --ammend
+    
+    commitamessage = commit -aeF message.txt
+    commitmessage = commit -aeF message.txt
+    ciamessage = commit -aeF message.txt
+    cimessage = commit -aeF message.txt
+    ciamessage = commit -aeF message.txt
+
+    configloc = !git config --list --show-origin | cut -f 1 | uniq | cut -f 2 -d :
+[pretty]
+    gig = %C(yellow)%h%Creset (%Cgreen%ad%Creset) %s%d [%Cblue%an%Creset]
+    giga = %C(yellow)%h%Creset [%Cblue%an%Creset] (%Cgreen%ad%Creset) %s%d
+    html = <li><a href="https://github.com/robertvandeneynde/{repo}/commit/%H">%s</a> [<a href="https://github.com/robertvandeneynde/simple-network/tree/%H">tree</a>]</li>
+    htmllong = <li><p><a href="https://github.com/robertvandeneynde/{repo}/commit/%H">%s</a> [<a href="https://github.com/robertvandeneynde/simple-network/tree/%H">tree</a>]</p><p>%b</p></li>
 [push]
-	default = simple
+    default = simple

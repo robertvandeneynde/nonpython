@@ -41,14 +41,17 @@ alias kaet=kate
 # shortening useful commands
 alias ff=firefox
 alias k=kate
+alias e=echo
+alias pe=pyecho
 
-# tweaking of standard commands 
+# standard commands tweaking  
 alias less='less -S'
 
 # standard commands simple modification
-alias hcat='tail -n +1'  # hcat FILES...
+alias hcat='tail -n +1'   # hcat FILES... to display name of file AND content
+alias catall='tail -n +1' # catall FILES... to display name of file AND content
 #wc-lines-sorted()
-#alias wcls=wc-lines-sorted
+alias wcls=wc-lines-sorted
 
 # custom aliases
 alias silent-background='$1 > /dev/null 2> /dev/null &'
@@ -155,7 +158,7 @@ alias cut-last-screenshot-keep-left='cut-last-screenshot keep-left'
 alias cut-last-screenshot-keep-right='cut-last-screenshot keep-right'
 
 set-django-class-env() {
-    export PS1='\n\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]\n$ '
+    PS1='\n\[\033[37;1m\]\A\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]\n$ '
     export PYTHONDONTWRITEBYTECODE=yes
 }
 
@@ -179,7 +182,7 @@ activatevenv() {
 alias amc=auto-multiple-choice
 
 texsee() {
-    name="$1"
+    local name="$1"
     
     name=$(python3 -c '
 import sys, os
@@ -204,7 +207,7 @@ make-script() {
 }
 
 make-pyscript() {
-    name="$1"
+    local name="$1"
     
     if [ -z "$name" ]; then
         echo "usage: make-pyscript NAME"
@@ -272,7 +275,7 @@ llwritable() {
         f="$@"
     fi
     
-    o=$(find $f -maxdepth 1 -type f -writable -printf '%P\n')
+    local o=$(find $f -maxdepth 1 -type f -writable -printf '%P\n')
     
     if [ -n "$o" ]; then
         ll $o
@@ -287,7 +290,7 @@ llreadonly() {
         f="$@"
     fi
     
-    o=$(find $f -maxdepth 1 -type f -perm 444 -printf '%P\n')
+    local o=$(find $f -maxdepth 1 -type f -perm 444 -printf '%P\n')
     
     if [ -n "$o" ]; then
         ll $o
@@ -298,7 +301,7 @@ llreadonly() {
 alias ps1-long=long-ps1
 long-ps1() {
     if [ -z "$OLD_PS1" ]; then
-        export OLD_PS1="$PS1"
+        OLD_PS1="$PS1"
     fi
     
     NEW_PS1=$(python3 -c '
@@ -308,18 +311,18 @@ PS1 = "\n(" + PS1.rstrip().rstrip("$").strip() + ")" + "\n$ "
 print(PS1)
     ' "$PS1")
 
-    # export PS1="$PS1\n> "
-    export PS1="$NEW_PS1"
+    # PS1="$PS1\n> "
+    PS1="$NEW_PS1"
 }
 
 alias ps1-short=short-ps1
 short-ps1() {
     if [ -z "$OLD_PS1" ]; then
-        export OLD_PS1="$PS1"
+        OLD_PS1="$PS1"
     fi
     
-    export PS1='\[\033[37;1m\]\A\[\033[00m\] [\[\033[01;34m\]\W\[\033[00m\]] $ '
-    # export PS1='\A \W $ '
+    PS1='\[\033[37;1m\]\A\[\033[00m\] [\[\033[01;34m\]\W\[\033[00m\]] $ '
+    # PS1='\A \W $ '
 }
 
 make_ps1_relative_to_project_dir() {
@@ -331,7 +334,7 @@ from pathlib import Path
 PWD, PROJECT_DIR = map(Path, (PWD, PROJECT_DIR))
 
 try:
-    P = "[" + PROJECT_DIR.parts[-1] + "]" + "/" + str(PWD.relative_to(PROJECT_DIR))
+    P = "[" + PROJECT_DIR.parts[-1] + "]" + " " + str(PWD.relative_to(PROJECT_DIR))
 except (ValueError, IndexError):
     P = str(PWD.absolute())
 
@@ -340,22 +343,24 @@ P = P.rstrip(".")
 if P != "/":
     P = P.rstrip("/")
 
+P = P.rstrip()
+
 print(OLD_PS1.replace("\\w", P).replace("\\W", P))
     ' "$OLD_PS1" "$PWD" "$PROJECT_DIR")
     
-    export PS1="$NEW_PS1"
+    PS1="$NEW_PS1"
 }
 
 alias project-ps1=ps1-project
 ps1-project() {
     if [ -z "$OLD_PS1" ]; then
-        export OLD_PS1="$PS1"
+        OLD_PS1="$PS1"
     fi
     
-    export PROJECT_DIR="$PWD"
+    PROJECT_DIR="$PWD"
     
     if [ -z "$OLD_PROMPT_COMMAND" ]; then
-        export OLD_PROMPT_COMMAND="$PROMPT_COMMAND"
+        OLD_PROMPT_COMMAND="$PROMPT_COMMAND"
         
         PROMPT_COMMAND=$(python3 -c '
 import sys
@@ -383,9 +388,9 @@ restore-ps1() {
 }
 
 
-swap(){
+swap() {
     if [ -e "$1" ] && [ -e "$2" ]; then
-        temp=$(date +%s)
+        local temp=$(date +%s)
         if [ -e "$temp" ]; then
             echo "File with timestamp already exists: '$temp'"
             return
@@ -399,7 +404,7 @@ swap(){
 }
 
 upload-last-mp3() {
-    f=$(ls -t *.mp3 | head -1)
+    local f=$(ls -t *.mp3 | head -1)
     scp "$f" rob:mp3-transit
     echo "Uploaded '$f'"
 }
@@ -414,16 +419,16 @@ wc-lines-sorted() {
 alias wcls=wc-lines-sorted
 
 streaming() {
-     INRES="1920x1080"    # input resolution
-     OUTRES="1920x1080"   # output resolution
-     FPS="15"             # target FPS
-     GOP="30"             # i-frame interval, should be double of FPS, 
-     GOPMIN="15"          # min i-frame interval, should be equal to fps, 
-     THREADS="2"          # max 6
-     CBR="1000k"          # constant bitrate (should be between 1000k - 3000k)
-     QUALITY="ultrafast"  # one of the many FFMPEG preset
-     AUDIO_RATE="44100"   # audio rate
-     SERVER="live-ams"    # twitch server, see http://bashtech.net/twitch/ingest.php to change 
+     local INRES="1920x1080"    # input resolution
+     local OUTRES="1920x1080"   # output resolution
+     local FPS="15"             # target FPS
+     local GOP="30"             # i-frame interval, should be double of FPS, 
+     local GOPMIN="15"          # min i-frame interval, should be equal to fps, 
+     local THREADS="2"          # max 6
+     local CBR="1000k"          # constant bitrate (should be between 1000k - 3000k)
+     local QUALITY="ultrafast"  # one of the many FFMPEG preset
+     local AUDIO_RATE="44100"   # audio rate
+     local SERVER="live-ams"    # twitch server, see http://bashtech.net/twitch/ingest.php to change 
      
      echo -n "StreamKey: "
      read -s STREAM_KEY
@@ -433,3 +438,43 @@ streaming() {
        -s $OUTRES -preset $QUALITY -tune film -acodec libmp3lame -threads $THREADS -strict normal \
        -bufsize $CBR "rtmp://$SERVER.twitch.tv/app/$STREAM_KEY"
 }
+
+hds() {
+    hd "$@" |\
+        sed 's/ 09/ \\t/g' |\
+        sed 's/ 0a/ \\n/g' |\
+        sed 's/ 0d/ \\r/g' |\
+        sed 's/ 20/ \\s/g' |\
+        grep -E ' [89abcdef].| \\[tnrs]| \[\]| 00' -C 1000000
+}
+
+unzipmkdir() {
+    local name=$(python3 -c '
+import sys, os
+name = sys.argv[1]
+if name.endswith((".zip", ".")):
+    name = os.path.splitext(name)[0]
+print(name)
+    ' "$1")
+    
+    mkdir "$name"
+    mv "$name.zip" "$name"
+    (cd "$name"; unzip "$name.zip")
+}
+
+unzipmkdircd() {
+    local name=$(python3 -c '
+import sys, os
+name = sys.argv[1]
+if name.endswith((".zip", ".")):
+    name = os.path.splitext(name)[0]
+print(name)
+    ' "$1")
+    
+    mkdir "$name"
+    mv "$name.zip" "$name"
+    cd "$name"
+    unzip "$name.zip"
+}
+
+hdall() { for x in "$@"; do echo "==> $x <=="; hd "$x"; done; }

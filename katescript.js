@@ -143,9 +143,10 @@ var katescript = {
             "category": "Enclose"
         },
         {
-            "function": "encloseHtmlKbd",
-            "name": "encloseHtmlKbd",
-            "category": "Enclose"
+            "function": "encloseHtml",
+            "name": "encloseHtml",
+            "category": "Enclose",
+            "interactive": true
         },
         {
             "function": "encloseHtmlKbd",
