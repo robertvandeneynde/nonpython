@@ -27,6 +27,7 @@ alias lg='l --group-directories-first'
 alias llg='ll --group-directories-first'
 alias lsd='ls -d */'  # show only directories
 alias lgd='lsd'
+alias lld='ll -d'
 alias l='ls -CF'
 alias s='cd ..'
 alias ss='cd ../..'  # if you want `/bin/ss`, write `/bin/ss`
@@ -37,12 +38,16 @@ alias c=cd  # because two letters are too much
 # typos
 alias dc=cd  # if you want dc calculator, use /usr/bin/dc
 alias kaet=kate
+alias bim=vim
 
-# shortening useful commands
+# shortening useful commands to 2 letters or 1 if used a lot
 alias ff=firefox
 alias k=kate
+alias v=vim
 alias e=echo
 alias pe=pyecho
+alias g=grep
+alias kl=kolourpaint
 
 # standard commands tweaking  
 alias less='less -S'
@@ -99,7 +104,7 @@ last-screenshot() {
     else
         N="$1"
     fi
-    ls -d ~/screenshots/* --sort=time | head -n "$N"
+    ls -d ~/screenshots/screenshot* --sort=time | head -n "$N"
 }
 
 last-screenshots() {
@@ -230,7 +235,7 @@ print(name)
     echo '#!/usr/bin/env python3
 import argparse
 p = parser = argparse.ArgumentParser()
-p.add_argument("file")
+p.add_argument("files", nargsd="+")
 a = args = parser.parse_args()
 ' >> "$name"
     chmod +x "$name"
@@ -325,6 +330,16 @@ short-ps1() {
     # PS1='\A \W $ '
 }
 
+alias fulltime-ps1=ps1-fulltime
+ps1-fulltime() {
+    if [ -z "$OLD_PS1" ]; then
+        OLD_PS1="$PS1"
+    fi
+    
+    PS1=$(echo "$PS1" | sed 's/\\A/\\t/g')
+    # python3: PS1 = PS1.replace('\\A', '\\t')
+}
+
 make_ps1_relative_to_project_dir() {
     NEW_PS1=$(python3 -c '
 import sys
@@ -410,7 +425,12 @@ upload-last-mp3() {
 }
 
 vimcat() {
-    vim "$1" && cat "$1"
+    if [ -z "$1" ]; then
+        echo "Usage: vimcat FILE"
+        return
+    else
+        vim "$1" "${@:2}" && cat "$1"
+    fi
 }
 
 wc-lines-sorted() {
@@ -418,6 +438,7 @@ wc-lines-sorted() {
 }
 alias wcls=wc-lines-sorted
 
+alias twitch=streaming
 streaming() {
      local INRES="1920x1080"    # input resolution
      local OUTRES="1920x1080"   # output resolution
@@ -444,7 +465,7 @@ hds() {
         sed 's/ 09/ \\t/g' |\
         sed 's/ 0a/ \\n/g' |\
         sed 's/ 0d/ \\r/g' |\
-        sed 's/ 20/ \\s/g' |\
+        sed 's/ 20/ \  /g' |\
         grep -E ' [89abcdef].| \\[tnrs]| \[\]| 00' -C 1000000
 }
 
@@ -459,7 +480,7 @@ print(name)
     
     mkdir "$name"
     mv "$name.zip" "$name"
-    (cd "$name"; unzip "$name.zip")
+    (cd "$name"; unzip "$name.zip"; mv "$name.zip" ..)
 }
 
 unzipmkdircd() {
@@ -475,6 +496,33 @@ print(name)
     mv "$name.zip" "$name"
     cd "$name"
     unzip "$name.zip"
+    mv "$name.zip" ..
 }
 
 hdall() { for x in "$@"; do echo "==> $x <=="; hd "$x"; done; }
+cdmkdir() { mkdir -p "$1"; cd "$1"; }
+alias mkdircd=cdmkdir
+alias cut80='cut -c -80'
+alias cut100='cut -c -100'
+alias kdiff=kdiff3
+mv-prepend() { mv "$1" "${@:2}-$1"; }
+add-quote() { echo $@ >> ~/quotes/main.html; };
+
+# edit-last-screenshot
+# edit-last-screenshot gimp
+# edit-last-screenshot gimp 2
+# edit-last-screenshot 2
+edit-last-screenshot() {
+    if [ "$1" = kolour ] || [ "$1" = k ] || [ "$1" = kde ]; then
+        local PROGRAM=kolourpaint
+        shift
+    elif [ "$1" = gimp ] || [ "$1" = g ]; then
+        local PROGRAM=gimp
+        shift
+    else  # assert not param.isdecimal()
+        local PROGRAM=kolourpaint
+    fi
+    $PROGRAM $(last-screenshot $1);
+}
+
+

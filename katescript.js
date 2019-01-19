@@ -6,6 +6,8 @@ var katescript = {
     "kate-version": "5.1",
     "type": "commands",
     "functions": [
+        "svgFormatStyleOnLine",
+        "moveBlank",
         "replaceMultiple",
         "replaceForAllNotation",
         "replaceLatex",
@@ -39,7 +41,9 @@ var katescript = {
         "saveEnclose",
         "xorEncode",
         "encloseHtml",
+        "encloseHtmlLink",
         "encloseHtmlKeyboard",
+        "encloseHtmlA",
         "encloseHtmlKbd",
         "ipafrench",
         "htmlMarklines",
@@ -154,6 +158,11 @@ var katescript = {
             "category": "Enclose"
         },
         {
+            "function": "encloseHtmlA",
+            "name": "encloseHtmlA",
+            "category": "Enclose"
+        },
+        {
             "function": "insertFrenglishSemicolon",
             "name": "insertFrenglishSemicolon",
             "category": "Insert"
@@ -169,19 +178,17 @@ var katescript = {
             "category": "Enclose"
         },
         {
-            
             "function": "enclose",
             "name": "enclose",
             "category": "Enclose"
         },
         {
-            
             "function": "encloseCustom",
             "name": "encloseCustom",
             "category": "Enclose"
         },
     {}]
-}; // kate-script header, must be at the start of the file as a valid JSON object (therefore without comments)
+}; // kate-script header, must be at the start of the file as a valid JSON object (therefore without comments and trailing commas)
 
 // http://www.kate-editor.org/doc/advanced-editing-tools-scripting.html#advanced-editing-tools-scripting-api
 // http://kate-editor.org/2009/10/29/extending-kate-with-scripts/
@@ -1232,7 +1239,10 @@ function encloseSave(start, end) {
 
 
 /**
- * example : encloseSelectionHtml('a') -> <a>{}</a>
+ * encloseSelectionHtml('a') -> <a>{}</a>
+ * encloseSelectionHtml('a.hello.world') -> <a class="hello world">{}</a>
+ * encloseSelectionHtml('.hello.world') -> <span class="hello world">{}</span>
+ * encloseSelectionHtml('a#hello') -> <a id="hello">{}</a>
  */
 function encloseSelectionHtml(tag) {
     if(tag.indexOf('#') == -1 && tag.indexOf('.') == -1) {
@@ -1279,7 +1289,6 @@ function encloseSelectionHtml(tag) {
         
         var attrs = (function() { // ' '.join(a + '=' + '"' + b + '"' for a,b in attributes)
             var A = []
-            for(var i = 0; i < attributes.length; i++)
                 A.push(attributes[i][0] + '=' + '"' + attributes[i][1] + '"')
             return A.join(' ')
         })()
@@ -1295,6 +1304,12 @@ function encloseHtmlKbd() {
 }
 
 encloseHtmlKeyboard = encloseHtmlKbd; // function encloseHtmlKeyboard
+
+function encloseHtmlLink() {
+    return encloseSelection('<a href="">', '</a>');
+}
+
+encloseHtmlA = encloseHtmlLink; // function encloseHtmlA
 
 function makepmatrix() {
     return encloseSelection('\\begin{pmatrix}', '\\end{pmatrix}')
@@ -1477,3 +1492,33 @@ function htmlMarklines() {
 }
 htmlKeyboard = encloseHtmlKeyboard
 htmlEnclose = encloseHtml
+
+function svgFormatStyleOnLine() {
+    replaceText(function(text) {
+        return text.replace(/;/g, ';\n').replace(/:/g, ': ')
+        // TODO indent
+    })
+}
+
+function print(/*args...*/) {
+    var args = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
+    // console.log(args.map(function(x){ '' + x }).join(' '))
+}
+
+function assert(cond, msg) {
+    if(! cond) {
+        print(msg || '')
+        throw msg
+    }
+}
+
+/**
+ * "<!--     hello" → "    <!-- hello"
+ */
+function moveBlank() {
+    replaceLines(function(x){
+        // return x.replace(/([^\s]+)(\s{1,})/, '$2 $1')
+        // this version of js doesn't have .replace...
+        return x + '! TODO !'
+    })
+}

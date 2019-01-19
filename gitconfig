@@ -1,9 +1,11 @@
 [user]
     name = Robert Vanden Eynde
     email = robertvandeneynde@hotmail.com
+
 [core]
     editor = vim
     commentChar = auto
+
 [alias]
     co = checkout
     #ci = commit
@@ -25,6 +27,7 @@
     
     #logd = log --format=%ar 
     lastdate = log --format=%ar -1
+    lastdateh = log --date=iso --format=%ad -1
     
     commitupdate = commit -am Update
     commitaupdate = commit -am Update
@@ -32,8 +35,8 @@
     ciauto = commit -am Update
     cito = commit -am Update
     
-    cimmmend = commit -a --ammend
-    commitmmmend = commit -a --ammend
+    ciaamend = commit -a --amend
+    commitaamend = commit -a --amend
     
     commitamessage = commit -aeF message.txt
     commitmessage = commit -aeF message.txt
@@ -42,10 +45,14 @@
     ciamessage = commit -aeF message.txt
 
     configloc = !git config --list --show-origin | cut -f 1 | uniq | cut -f 2 -d :
+
 [pretty]
     gig = %C(yellow)%h%Creset (%Cgreen%ad%Creset) %s%d [%Cblue%an%Creset]
     giga = %C(yellow)%h%Creset [%Cblue%an%Creset] (%Cgreen%ad%Creset) %s%d
     html = <li><a href="https://github.com/robertvandeneynde/{repo}/commit/%H">%s</a> [<a href="https://github.com/robertvandeneynde/simple-network/tree/%H">tree</a>]</li>
+    htmlsplit = <li><a href="https://github.com/robertvandeneynde/{repo}/commit/%H&diff=split">%s</a> [<a href="https://github.com/robertvandeneynde/simple-network/tree/%H">tree</a>]</li>
     htmllong = <li><p><a href="https://github.com/robertvandeneynde/{repo}/commit/%H">%s</a> [<a href="https://github.com/robertvandeneynde/simple-network/tree/%H">tree</a>]</p><p>%b</p></li>
+    htmllongsplit = <li><p><a href="https://github.com/robertvandeneynde/{repo}/commit/%H&diff=split">%s</a> [<a href="https://github.com/robertvandeneynde/simple-network/tree/%H">tree</a>]</p><p>%b</p></li>
+
 [push]
     default = simple
