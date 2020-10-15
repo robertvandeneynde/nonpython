@@ -56,3 +56,5 @@
 
 [push]
     default = simple
+[merge]
+	tool = kdiff3

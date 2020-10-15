@@ -82,6 +82,8 @@ alias recordmydesktop-mobile='recordmydesktop --width=540 --height=960'
 # xclip macOS-like aliases
 alias pbcopy='xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
+alias cc=pbcopy  # for real cc program, use /usr/bin/cc
+alias cv=pbpaste
 
 # misc.
 
@@ -113,7 +115,16 @@ last-screenshots() {
     else
         N="$1"
     fi
-    ls -d ~/screenshots/* --sort=time | head -n "$N"
+    ls -d ~/screenshots/screenshot* --sort=time | head -n "$N"
+}
+
+last-screenshot-name() {
+    if [ -z "$1" ]; then
+        N=1
+    else
+        N="$1"
+    fi
+    ((cd ~/screenshots/ && ls screenshot* --sort=time) | head -n "$N")
 }
 
 cut-last-screenshot() {
@@ -460,6 +471,30 @@ streaming() {
        -bufsize $CBR "rtmp://$SERVER.twitch.tv/app/$STREAM_KEY"
 }
 
+alias youtube=streaming-youtube
+streaming-youtube() {
+     local INRES="1920x1080"    # input resolution
+     local OUTRES="1920x1080"   # output resolution
+     local FPS="15"             # target FPS
+     local GOP="30"             # i-frame interval, should be double of FPS, 
+     local GOPMIN="15"          # min i-frame interval, should be equal to fps, 
+     local THREADS="2"          # max 6
+     #local CBR="1000k"          # constant bitrate (should be between 1000k - 3000k)
+     local CBR="4500k"          # constant bitrate (should be between 1000k - 3000k)
+     local QUALITY="ultrafast"  # one of the many FFMPEG preset
+     local AUDIO_RATE="44100"   # audio rate
+     local URL="rtmp://a.rtmp.youtube.com/live2"
+     
+     echo "On $URL"
+     echo -n "StreamKey: "
+     read -s STREAM_KEY
+
+     ffmpeg -f x11grab -s "$INRES" -r "$FPS" -i :0.0 -f alsa -i pulse -f flv -ac 2 -ar $AUDIO_RATE \
+       -vcodec libx264 -g $GOP -keyint_min $GOPMIN -b:v $CBR -minrate $CBR -maxrate $CBR -pix_fmt yuv420p\
+       -s $OUTRES -preset $QUALITY -tune film -acodec libmp3lame -threads $THREADS -strict normal \
+       -bufsize $CBR "$URL/$STREAM_KEY"
+}
+
 hds() {
     hd "$@" |\
         sed 's/ 09/ \\t/g' |\
@@ -525,4 +560,104 @@ edit-last-screenshot() {
     $PROGRAM $(last-screenshot $1);
 }
 
+alias copy-edit-last-screenshot=edit-copy-last-screenshot
+edit-copy-last-screenshot() {
+    if [ "$1" = kolour ] || [ "$1" = k ] || [ "$1" = kde ]; then
+        local PROGRAM=kolourpaint
+        shift
+    elif [ "$1" = gimp ] || [ "$1" = g ]; then
+        local PROGRAM=gimp
+        shift
+    else  # assert not param.isdecimal()
+        local PROGRAM=kolourpaint
+    fi
+    
+    local oldname="$(last-screenshot)"
+    local name=$(python3 -c '
+import sys, os
+name = sys.argv[1]
 
+from pathlib import Path as path
+p = path(name)
+stem = p.stem
+if "__" not in stem:
+    i = 1
+else:
+    stem, i = stem.split("__")
+    i = int(i) + 1
+while True:
+    name = p.with_name(stem + "__" + str(i) + p.suffix)
+    if name.exists():
+        i = i + 1
+    else:
+        break
+print(name)
+    ' "$oldname")
+    
+    cp "$oldname" "$name"
+    $PROGRAM "$name"
+}
+
+alias timeuntilpoll=timeuntil-poll
+timeuntil-poll() {
+    local time="$1"
+    local name="$2"
+    local minutes="$3"
+    if [ -z "$minutes"]; then minutes=1; fi
+    while test a = a; do
+        kdialog --passivepopup "`timeuntil.py "$time" | tr ':' 'h'` until $name" 30 \
+        && sleep $((60*minutes))
+    done
+}
+
+apt-show-installed-packages() {
+    dpkg-query --show --showformat='${Package;-50}\t${Installed-Size}\n' | sort -k 2 -n | grep -v deinstall | awk '{printf "%.3f MB \t %s\n", $2/(1024), $1}'
+}
+
+keyboards() {
+python3 -c '
+import subprocess, unicodedata, re, collections
+
+import argparse
+p = argparse.ArgumentParser()
+p.add_argument("-v", "--verbose", action="store_true")
+args = p.parse_args()
+
+D = collections.defaultdict(list)
+for l in subprocess.check_output("xinput").decode("utf-8").splitlines():
+    #if "Keyboard  " in l:
+    data = l.split("\t")
+    index = next((i for i,x in enumerate(data[0]) if unicodedata.category(x)[0] == "L"), None)
+    if index is None:
+        continue
+    try:
+        data[0]
+    except:
+        print(f"No tab in line {l:!r}")
+    key = data[0][index:].strip()
+    value = re.findall("[0-9]+", data[1])[0]
+    D[key].append(value)
+
+#print(D)
+for locale, variant, name in (
+    ("ru,us", ",", "USB USB Keyboard"),
+    ("be,ru", ",phonetic_azerty", "dakai PS/2+USB Keyboard")):
+    try:
+       D[name][0]
+    except KeyError:
+        if args.verbose:
+            print(f"Can`t find name {name}")
+        continue
+    except IndexError:
+        if args.verbose:
+            print(f"{name} doesn`t hav infos")
+        continue
+    command = "setxkbmap -layout {} -device {} -variant {}".format(locale, D[name][0], variant)
+    if args.verbose:
+        print(command + "  # " + name)
+    subprocess.check_output(command.split())
+' $*
+    #xinput | grep 'Keyboard  '
+    #echo 'setxkbmap -layout be -device 17'
+    #echo 'setxkbmap -layout ru -device 22'
+}

@@ -117,9 +117,6 @@ export PATH="$PATH:/usr/local/android-sdk-linux/tools"
 export PATH="$PATH:/usr/local/android-sdk-linux/platform-tools"
 export PATH="$PATH:/usr/local/android-sdk-linux/build-tools"
 
-# added by Miniconda2 4.0.5 installer
-export PATH="$PATH:/home/robert/miniconda2/bin"
-
 # own directories in PATH
 export PATH="$PATH:$HOME/python"
 export PATH="$PATH:$HOME/python/amc_utils"
@@ -127,5 +124,15 @@ export PATH="$PATH:$HOME/nonpython"
 export PATH="$PATH:$HOME/bash"
 export PATH="$PATH:$HOME/perl"
 
-WORKON_HOME=$HOME/.virtualenvs
-source /usr/local/bin/virtualenvwrapper.sh 
+export PATH="$PATH:$HOME/.local/bin"
+
+#WORKON_HOME=$HOME/.virtualenvs
+#source /usr/local/bin/virtualenvwrapper.sh 
+
+#setup multiple keyboards
+echo "use 'keyboards' command to setup BE-RU setup"
+#keyboards
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="/home/robert/.sdkman"
+[[ -s "/home/robert/.sdkman/bin/sdkman-init.sh" ]] && source "/home/robert/.sdkman/bin/sdkman-init.sh"
