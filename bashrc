@@ -136,3 +136,5 @@ echo "use 'keyboards' command to setup BE-RU setup"
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="/home/robert/.sdkman"
 [[ -s "/home/robert/.sdkman/bin/sdkman-init.sh" ]] && source "/home/robert/.sdkman/bin/sdkman-init.sh"
+
+robve=robertvandeneynde.be

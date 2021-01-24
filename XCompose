@@ -1,0 +1,65 @@
+include "%L"
+
+# Compose Key
+<Multi_key> <minus> <minus> <underscore> : "−" U2212  # MINUS SIGN
+<Multi_key> <p> <i> : "π"  # PI
+<Multi_key> <exclam> <equal> : "≠"  # NOT EQUAL TO
+
+<Multi_key> <h> <m> <m> : "🤔" U1F914 # THINKING FACE
+<Multi_key> <r> <d> <d> <e> : "🙃" U1F643 # Upside-Down Face Emoji
+<Multi_key> <s> <m> <i> <r> <k> : "😏"  # Smirking Face 
+<Multi_key> <colon> <o> : "😲"  # Astonished Face 
+<Multi_key> <s> <h> <r> <u> <g> : "🤷"  # Shrug
+<Multi_key> <m> <u> <s> <i> <c> : "🎵"  # Music
+<Multi_key> <z> <i> <k> : "🎵"  # Music
+<Multi_key> <(> <8> <)> : "🎵"  # Music
+<Multi_key> <o> <k> : "👌"
+<Multi_key> <o> <k> <s> <i> <g> <n> : "👌"
+<Multi_key> <d> <d> <d> : "😀"
+<Multi_key> <d> <d> <e> : "🙂"
+<Multi_key> <x> <q> <e> : "😅"
+<MM> {(y)} : "👍"
+<MM> {(nosee)} : "🙈"
+<Multi_key> <f> <i> <s> <h> : "🐟"
+<Multi_key> <z> <i> <p> : "🤐"
+<Multi_key> <o> <h> <e> <a> <r> <t> : "🧡"  # U+1F9E1 ORANGE HEART
+<Multi_key> <b> <i> <r> <d> : "🐦"
+<Multi_key> <n> <o> <t> : "¬"
+
+
+<Multi_key> <colon> <three> : "🤭"  # U+1F92D
+# TOFIX: ":3" → U+1F92D
+
+# IPA
+# <a> <z> <e> : "hello"
+<dead_acute> <r> : "ʁ"
+<dead_acute> <R> : "ɹ"
+<dead_agrave> <r> : "ɹ"
+<dead_acute> <n> : "ɲ"
+<dead_acute> <o> : "ɔ"
+<dead_acute> <O> : "ø"
+<dead_agrave> <o> : "ø"
+<dead_acute> <a> : "ɑ"
+<dead_acute> <e> : "ə"
+<dead_agrave> <e> : "ɛ"
+<dead_acute> <egrave> : "ɛ"
+<dead_acute> <g> : "ʒ"
+<dead_acute> <j> : "ʒ"
+<dead_acute> <c> : "ʃ"
+<dead_acute> <s> : "ʃ"
+<dead_acute> <y> : "ɥ"
+<dead_acute> <u> : "ɥ"
+<dead_agrave> <u> : "ʊ"
+<dead_acute> <u> : "ʌ"
+<dead_acute> <v> : "ʌ"
+<dead_acute> <colon> : "ː"
+<dead_acute> <minus> : "‿"
+#<dead_acute> <euro> : "₽"
+<dead_acute> <i> : "ɪ"
+# combining ~
+<dead_acute> <tilde> : U0303
+
+<dead_acute> <s> : "ș"
+<dead_acute> <t> : "ț"
+<dead_acute> <a> : "ă"
+

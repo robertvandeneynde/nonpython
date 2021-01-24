@@ -48,6 +48,9 @@ alias e=echo
 alias pe=pyecho
 alias g=grep
 alias kl=kolourpaint
+alias open=xdg-open
+alias clem=clementine
+alias rok=amarok
 
 # standard commands tweaking  
 alias less='less -S'
@@ -246,7 +249,7 @@ print(name)
     echo '#!/usr/bin/env python3
 import argparse
 p = parser = argparse.ArgumentParser()
-p.add_argument("files", nargsd="+")
+p.add_argument("files", nargs="+")
 a = args = parser.parse_args()
 ' >> "$name"
     chmod +x "$name"
@@ -265,6 +268,21 @@ lswritable() {
     
     if [ -n "$o" ]; then
         ls $o
+    fi
+}
+
+alias ll-writable=llwritable
+llwritable() {
+    if [ $# -eq 0 ]; then
+        f="."
+    else
+        f="$@"
+    fi
+    
+    o=$(find $f -maxdepth 1 -type f -writable -printf '%P\n')
+    
+    if [ -n "$o" ]; then
+        ll $o
     fi
 }
 
@@ -603,7 +621,7 @@ timeuntil-poll() {
     local time="$1"
     local name="$2"
     local minutes="$3"
-    if [ -z "$minutes"]; then minutes=1; fi
+    if [ -z "$minutes" ]; then minutes=1; fi
     while test a = a; do
         kdialog --passivepopup "`timeuntil.py "$time" | tr ':' 'h'` until $name" 30 \
         && sleep $((60*minutes))
@@ -661,3 +679,8 @@ for locale, variant, name in (
     #echo 'setxkbmap -layout be -device 17'
     #echo 'setxkbmap -layout ru -device 22'
 }
+brightness() {
+    brightness="$1"
+    xrandr --output HDMI-1-1 --brightness "$brightness"
+}
+termsize() { echo "$(tput cols)x$(tput lines)"; }
