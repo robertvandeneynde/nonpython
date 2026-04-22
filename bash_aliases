@@ -64,7 +64,7 @@ alias wcls=wc-lines-sorted
 # custom aliases
 alias silent-background='$1 > /dev/null 2> /dev/null &'
 alias background-silent='$1 > /dev/null 2> /dev/null &'
-alias pyecho='python -c "import sys; from pprint import pprint; pprint(sys.argv[1:])"'
+alias pyecho='python3 -c "import sys; from pprint import pprint; pprint(sys.argv[1:])"'
 
 # operations on just created files
 ## last-* aliases are actually defined below as functions to take One parameter: n
@@ -100,7 +100,7 @@ last-download() {
     else
         N="$1"
     fi
-    ls -d ~/downloads/* --sort=time | head -n "$N"
+    /bin/ls -d ~/downloads/* --sort=time | head -n "$N"
 }
 
 last-screenshot() {
@@ -684,3 +684,26 @@ brightness() {
     xrandr --output HDMI-1-1 --brightness "$brightness"
 }
 termsize() { echo "$(tput cols)x$(tput lines)"; }
+alias open=xdg-open
+alias inkscape=/home/robert/programs/Inkscape-ebf0e94-x86_64.AppImage
+alias lpy=python3.14
+
+ffia() {
+    python3 -c '
+import sys
+s = " ".join(sys.argv[1:])
+import subprocess
+from urllib.parse import quote
+subprocess.check_call(["firefox", "duckduckgo.com/search?q="+quote("!ai" + " " + s)])
+    ' $*
+}
+
+ffsearch() {
+    python3 -c '
+import sys
+s = " ".join(sys.argv[1:])
+import subprocess
+from urllib.parse import quote
+subprocess.check_call(["firefox", "duckduckgo.com/search?q="+quote(s)])
+    ' $*
+}
